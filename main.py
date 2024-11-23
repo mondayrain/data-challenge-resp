@@ -26,9 +26,35 @@ df_demographic_info = pd.read_csv(INPUT_PATH + '/demographic_info.txt',
                                   names = DEMOGRAPHIC_INFO_HEADERS,
                                   delimiter = "\t")
 
-# print(df_demographic_info)
+print("\n Figuring out if we're missing demographic data:")
+rows_missing_all_except_patient = df_demographic_info.drop(columns=['PatientNumber']).isnull().all(axis=1)
+print(f"\nRows missing all data except PatientNumber: {rows_missing_all_except_patient.sum}")
+print(rows_missing_all_except_patient)
+
+# How many and which rows with age < 15 are missing Child Weight (kg) or Child Height (cm)?
+rows_missing_child_data = df_demographic_info[
+    (df_demographic_info['Age'] < 15) & 
+    (df_demographic_info[['Child Weight (kg)', 'Child Height (cm)']].isnull().any(axis=1))
+]
+print(f"\nRows with age < 15 missing Child Weight or Child Height: {len(rows_missing_child_data)}\n")
+print(rows_missing_child_data)
+
+# 3. How many and which rows with Age > 15 that are missing Adult BMI (kg/m2)?
+adult_rows_missing_bmi = df_demographic_info[
+    (df_demographic_info['Age'] >= 15) & (df_demographic_info[['Adult BMI (kg/m2)']].isnull().any(axis=1))
+]
+print(f"\nRows with Age >= 15 Adult and missing BMI (kg/m2): {len(adult_rows_missing_bmi)}\n")
+print(adult_rows_missing_bmi)
+
 # endregion
 
+# =============================================
+# === IMPUTE MISSING DEMOGRAPHIC INFO
+# =============================================
+# region
+print("\n==== TODO: IMPUTE MISSING DEMOGRAPHIC INFO ====")
+
+# endregion
 # =============================================
 # === READING DIAGNOSIS INFO
 # =============================================
@@ -179,7 +205,7 @@ df_children_with_resp_data = pd.get_dummies(
     drop_first=True  # Drop the first category to avoid multicollinearity
 )
 
-print(df_adults_with_resp_data.head())
+# print(df_adults_with_resp_data.head())
 
 # endregion
 
@@ -187,20 +213,20 @@ print(df_adults_with_resp_data.head())
 # === PRE-DIMENSIONALITY REDUCTION DATA VIZ
 # =============================================
 # region
-print("\n=== PRE-DIMENSIONALITY REDUCTION DATA VIZ")
-print("Some explorations with the data as-is before we reduce it\n")
+# print("\n=== PRE-DIMENSIONALITY REDUCTION DATA VIZ")
+# print("Some explorations with the data as-is before we reduce it\n")
 
-# Correlation heatmap for adults
-diagnosis_columns = [col for col in df_adults_with_resp_data.columns if col.startswith("Diagnosis_")]
-chest_location_columns = [col for col in df_adults_with_resp_data.columns if col.startswith("ChestLocation_")]
-specific_columns = ['Adult BMI (kg/m2)']  # Manually add this column
+# # Correlation heatmap for adults
+# diagnosis_columns = [col for col in df_adults_with_resp_data.columns if col.startswith("Diagnosis_")]
+# chest_location_columns = [col for col in df_adults_with_resp_data.columns if col.startswith("ChestLocation_")]
+# specific_columns = ['Adult BMI (kg/m2)']  # Manually add this column
 
-# Combine the columns into one list
-columns_to_correlate = df_adults_with_resp_data[diagnosis_columns + chest_location_columns + specific_columns]
-corr_matrix = columns_to_correlate.corr()
-plt.figure(figsize=(10, 8))
-sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt=".2f", cbar=True)
-plt.title('Correlation Matrix for Adult Respiratory Data')
-plt.show()
+# # Combine the columns into one list
+# columns_to_correlate = df_adults_with_resp_data[diagnosis_columns + chest_location_columns + specific_columns]
+# corr_matrix = columns_to_correlate.corr()
+# plt.figure(figsize=(10, 8))
+# sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt=".2f", cbar=True)
+# plt.title('Correlation Matrix for Adult Respiratory Data')
+# plt.show()
 
 # # endregion
