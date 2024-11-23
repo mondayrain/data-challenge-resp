@@ -26,10 +26,17 @@ df_demographic_info = pd.read_csv(INPUT_PATH + '/demographic_info.txt',
                                   names = DEMOGRAPHIC_INFO_HEADERS,
                                   delimiter = "\t")
 
-print("\n Figuring out if we're missing demographic data:")
-rows_missing_all_except_patient = df_demographic_info.drop(columns=['PatientNumber']).isnull().all(axis=1)
-print(f"\nRows missing all data except PatientNumber: {rows_missing_all_except_patient.sum}")
-print(rows_missing_all_except_patient)
+print("\n Figuring out if we're missing demographic data...")
+# Find rows missing all data except PatientNumber
+missing_all_except_patient = df_demographic_info.drop(columns=['PatientNumber']).isnull().all(axis=1)
+
+# Get PatientNumbers of those rows
+patient_numbers_missing_all = df_demographic_info.loc[missing_all_except_patient, 'PatientNumber']
+
+print(f"Number of patients with all data missing: {len(patient_numbers_missing_all)}")
+patient_number_missing_all_data = patient_numbers_missing_all.tolist()[0]
+print("Patient {}".format(patient_number_missing_all_data))
+
 
 # How many and which rows with age < 15 are missing Child Weight (kg) or Child Height (cm)?
 rows_missing_child_data = df_demographic_info[
